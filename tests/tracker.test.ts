@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseTrackerCsv, safeSheetUrl, voteBillNumber } from "../worker/tracker";
+import { DEFAULT_SHEET_URL } from "../src/config";
 
 describe("tracker parsing", () => {
   it("keeps display suffixes while normalizing the vote code", () => {
@@ -12,5 +13,8 @@ describe("tracker parsing", () => {
   it("only permits Google Sheets HTTPS URLs", () => {
     expect(() => safeSheetUrl("https://evil.example/sheet.csv")).toThrow();
     expect(safeSheetUrl("https://docs.google.com/spreadsheets/d/a/pub?output=csv").hostname).toBe("docs.google.com");
+  });
+  it("uses the published NH Civic Commons tracker as the default", () => {
+    expect(safeSheetUrl(DEFAULT_SHEET_URL).hostname).toBe("docs.google.com");
   });
 });

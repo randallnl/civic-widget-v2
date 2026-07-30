@@ -1,18 +1,20 @@
 import type { VoteTrackerLookupResponse } from "./types";
+import { DEFAULT_SHEET_URL } from "./config";
 
 export const DEFAULT_API_BASE = "https://api.nhciviccommons.com";
 
 export type LookupConfig = {
   apiBase?: string;
   address: string;
-  sheet: string;
+  sheet?: string;
   sheetGid?: string;
   sessionYear?: number;
   candidateYear?: number;
 };
 
 export async function lookupVotes(config: LookupConfig): Promise<VoteTrackerLookupResponse> {
-  const { apiBase = DEFAULT_API_BASE, ...body } = config;
+  const { apiBase = DEFAULT_API_BASE, sheet = DEFAULT_SHEET_URL, ...rest } = config;
+  const body = { ...rest, sheet };
   const response = await fetch(
     `${apiBase.replace(/\/$/, "")}/widgets/vote-tracker/lookup`,
     {

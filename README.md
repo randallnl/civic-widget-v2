@@ -18,13 +18,12 @@ For local Worker development, create an uncommitted `.dev.vars` file containing 
 
 ```html
 <nhcc-vote-tracker
-  sheet="https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=1337871563&single=true&output=csv"
   title="See how your NH representatives voted">
 </nhcc-vote-tracker>
 <script async src="https://api.nhciviccommons.com/widgets/vote-tracker.js"></script>
 ```
 
-The API defaults to `https://api.nhciviccommons.com`. Use `api-base` only for local or staging environments.
+The API defaults to `https://api.nhciviccommons.com`, and the widget defaults to the NH Civic Commons published bill tracker. Partners can override the tracker with a public Google Sheets CSV URL using the optional `sheet` attribute. Use `api-base` only for local or staging environments.
 
 ## Existing API integration
 

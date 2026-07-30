@@ -1,6 +1,7 @@
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { lookupVotes, DEFAULT_API_BASE } from "./api";
+import { DEFAULT_SHEET_URL } from "./config";
 import { widgetStyles } from "./styles";
 import type { RepresentativeResult, TrackedVote, VoteTrackerLookupResponse } from "./types";
 
@@ -8,7 +9,7 @@ import type { RepresentativeResult, TrackedVote, VoteTrackerLookupResponse } fro
 export class NhccVoteTracker extends LitElement {
   static styles = widgetStyles;
 
-  @property() sheet = "";
+  @property() sheet = DEFAULT_SHEET_URL;
   @property({ attribute: "sheet-gid" }) sheetGid?: string;
   @property({ type: Number, attribute: "session-year" }) sessionYear?: number;
   @property({ type: Number, attribute: "candidate-year" }) candidateYear?: number;
@@ -31,7 +32,6 @@ export class NhccVoteTracker extends LitElement {
     const address = this.address.trim();
     this.error = "";
     if (!address) { this.error = "Address is required."; return; }
-    if (!this.sheet) { this.error = "This widget needs a sheet URL."; return; }
     this.loading = true;
     this.result = undefined;
     this.emit("nhcc-widget-submit", { address });

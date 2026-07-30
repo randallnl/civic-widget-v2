@@ -1,6 +1,7 @@
 import { divisionsByAddress, parseNhDivisions } from "./civic";
 import { findRepresentatives } from "./repository";
 import { parseTrackerCsv, safeSheetUrl } from "./tracker";
+import { DEFAULT_SHEET_URL } from "../src/config";
 
 type RuntimeEnv = Env & {
   CIVIC_API_KEY?: SecretsStoreSecret | string;
@@ -29,9 +30,8 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   const body = await request.json<LookupBody>().catch(() => null);
   const address = body?.address?.trim();
   if (!address) return json({ error: "Address is required." }, 400, cors);
-  if (!body?.sheet) return json({ error: "This widget needs a sheet URL." }, 400, cors);
 
-  const sheetUrl = safeSheetUrl(body.sheet, body.sheetGid);
+  const sheetUrl = safeSheetUrl(body?.sheet?.trim() || DEFAULT_SHEET_URL, body?.sheetGid);
   const [civicResult, sheetResponse] = await Promise.all([
     divisionsByAddress(address, civicApiKey),
     fetch(sheetUrl, { headers: { Accept: "text/csv" } })
@@ -41,7 +41,7 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   if (csv.length > 2_000_000) throw new Error("The bill tracker is too large.");
   const bills = parseTrackerCsv(csv);
   const civic = parseNhDivisions(civicResult.divisions);
-  const groups = await findRepresentatives(env.DB, civic, bills, body.sessionYear, body.candidateYear);
+  const groups = await findRepresentatives(env.DB, civic, bills, body?.sessionYear, body?.candidateYear);
   return json({
     address, normalizedInput: civicResult.normalizedInput || {}, civic, groups,
     tracker: { source: sheetUrl.toString(), count: bills.length, bills }
@@ -49,7 +49,7 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
 }
 
 function demo(): Response {
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NHCC Vote Tracker Demo</title><style>body{margin:0;background:#eef2f7}main{max-width:820px;margin:48px auto;padding:20px}</style></head><body><main><nhcc-vote-tracker sheet="REPLACE_WITH_PUBLISHED_GOOGLE_SHEET_CSV_URL"></nhcc-vote-tracker></main><script src="/widgets/vote-tracker.js"></script></body></html>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NHCC Vote Tracker Demo</title><style>body{margin:0;background:#eef2f7}main{max-width:820px;margin:48px auto;padding:20px}</style></head><body><main><nhcc-vote-tracker></nhcc-vote-tracker></main><script src="/widgets/vote-tracker.js"></script></body></html>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
 
 export default {
