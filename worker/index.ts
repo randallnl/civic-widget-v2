@@ -2,7 +2,10 @@ import { divisionsByAddress, parseNhDivisions } from "./civic";
 import { findRepresentatives } from "./repository";
 import { parseTrackerCsv, safeSheetUrl } from "./tracker";
 
-type RuntimeEnv = Env & { CIVIC_API_KEY?: string; DB?: D1Database };
+type RuntimeEnv = Env & {
+  CIVIC_API_KEY?: SecretsStoreSecret | string;
+  DB?: D1Database;
+};
 type LookupBody = {
   address?: string; sheet?: string; sheetGid?: string;
   sessionYear?: number; candidateYear?: number;
@@ -19,6 +22,10 @@ const cors = {
 
 async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   if (!env.CIVIC_API_KEY) return json({ error: "Civic Information API is not configured." }, 503, cors);
+  const civicApiKey = typeof env.CIVIC_API_KEY === "string"
+    ? env.CIVIC_API_KEY
+    : await env.CIVIC_API_KEY.get();
+  if (!civicApiKey) return json({ error: "Civic Information API is not configured." }, 503, cors);
   const body = await request.json<LookupBody>().catch(() => null);
   const address = body?.address?.trim();
   if (!address) return json({ error: "Address is required." }, 400, cors);
@@ -26,7 +33,7 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
 
   const sheetUrl = safeSheetUrl(body.sheet, body.sheetGid);
   const [civicResult, sheetResponse] = await Promise.all([
-    divisionsByAddress(address, env.CIVIC_API_KEY),
+    divisionsByAddress(address, civicApiKey),
     fetch(sheetUrl, { headers: { Accept: "text/csv" } })
   ]);
   if (!sheetResponse.ok) throw new Error("Unable to load the public bill tracker.");
