@@ -27,6 +27,8 @@ The API currently defaults to `https://civic-widget-v2.randall-d53.workers.dev`,
 
 Representative results use `d1_people` for canonical names, photos, and contact details. House representation is resolved through `county_codes` and `d1_district_mapping.communities_represented`, allowing the widget to include both base and floterial districts. When Google does not return a ward for one of New Hampshire’s ward-based cities, the widget asks the resident for their ward and repeats the lookup.
 
+Tracked votes are matched by the sheet’s exact `Code` and `Vote Sequence` pair, even when tracked bills span multiple session years. `Preferred Stance` determines the pill color, while `Yea Interpretation` and `Nay Interpretation` provide the displayed vote meaning.
+
 ## Existing API integration
 
 Copy `worker/` into the existing NH Civic Commons API Worker or merge its three routes:

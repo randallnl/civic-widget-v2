@@ -48,6 +48,7 @@ export const widgetStyles = css`
   .impact { margin:7px 0 0; color:#39475c; font-size:.9rem; }
   a { color:inherit; } .pill { align-self:start; padding:4px 9px; border-radius:999px; background:#edf1f6; color:#40516a; font-size:.78rem; font-weight:800; white-space:nowrap; }
   .support { background:#e3f4e9; color:#176334; } .against { background:#fde8e6; color:#9b2c25; }
+  .pill { max-width:270px; white-space:normal; text-align:center; line-height:1.3; }
   footer { padding:12px 24px; border-top:1px solid #e4e9f0; color:#6c7789; font-size:.78rem; }
   @media (max-width:560px) { form { flex-direction:column; } button { width:100%; } .vote-row { grid-template-columns:1fr; } .filter { grid-template-columns:1fr; } .filter span { grid-column:auto; } .ward-prompt { grid-template-columns:1fr; } .ward-controls { align-items:stretch; flex-direction:column; } .ward-controls input { width:100%; } }
   @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }

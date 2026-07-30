@@ -19,6 +19,7 @@ type RepresentativeRow = {
 type VoteRow = {
   representative_id: number;
   bill_number: string;
+  vote_sequence: number;
   vote: string;
   question_motion: string | null;
 };
@@ -41,6 +42,32 @@ function houseDistrict(divisionId?: string): { county: string; district: string 
 
 function voteLabel(code: string): string {
   return ({ "1": "yea", "2": "nay", "3": "absent", "4": "No vote found", "6": "present" } as Record<string, string>)[code] || code;
+}
+
+function displayVote(value: string): string {
+  return value === "No vote found" ? value : value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function interpretedVote(bill: TrackerBill, rawCode: string): Vote {
+  const vote = voteLabel(rawCode);
+  const normalizedVote = vote.toLowerCase();
+  const interpretation = normalizedVote === "yea"
+    ? bill.yeaInterpretation
+    : normalizedVote === "nay"
+      ? bill.nayInterpretation
+      : undefined;
+  const preferred = bill.preferredStance?.trim().toLowerCase();
+  const alignment = preferred && (normalizedVote === "yea" || normalizedVote === "nay")
+    ? normalizedVote === preferred ? "preferred" : "opposed"
+    : "neutral";
+  return {
+    vote,
+    vote_label: interpretation
+      ? `${bill.billNumber}: ${displayVote(vote)}, ${interpretation} Vote`
+      : `${bill.billNumber}: ${displayVote(vote)}`,
+    interpretation,
+    alignment
+  };
 }
 
 function civicPlace(civic: ParsedCivic): string {
@@ -131,21 +158,27 @@ export async function findRepresentatives(
   for (const mapping of houseMappings) bindings.push(String(mapping.county).padStart(2, "0"), String(mapping.district));
   const reps = await db.prepare(query).bind(...bindings).all<RepresentativeRow>();
   const employeeIds = reps.results.map((rep) => rep.employeeno);
-  const billCodes = [...new Set(bills.map((bill) => bill.voteBillNumber))];
+  const voteTargets = bills.filter((bill): bill is TrackerBill & { voteSequence: number } =>
+    Number.isInteger(bill.voteSequence)
+  );
   let votes: VoteRow[] = [];
-  if (employeeIds.length && billCodes.length) {
+  if (employeeIds.length && voteTargets.length) {
+    const targetConditions = voteTargets.map(() =>
+      "(upper(h.condensedbillno) = ? AND h.votesequencenumber = ?)"
+    );
     const voteQuery = `SELECT h.employeenumber AS representative_id,
-        upper(h.condensedbillno) AS bill_number, h.vote, s.question_motion
+        upper(h.condensedbillno) AS bill_number,
+        h.votesequencenumber AS vote_sequence, h.vote, s.question_motion
       FROM d1_rollcallhistory h
       JOIN d1_rollcallsummary s
         ON s.sessionyear = h.sessionyear
         AND s.legislativebody = h.legislativebody
         AND s.votesequencenumber = h.votesequencenumber
       WHERE h.employeenumber IN (${employeeIds.map(() => "?").join(",")})
-        AND upper(h.condensedbillno) IN (${billCodes.map(() => "?").join(",")})
-        AND h.sessionyear = ?
-      ORDER BY s.votedate DESC, h.votesequencenumber DESC`;
-    votes = (await db.prepare(voteQuery).bind(...employeeIds, ...billCodes, sessionYear ?? 2026).all<VoteRow>()).results;
+        AND (${targetConditions.join(" OR ")})
+      ORDER BY h.sessionyear DESC, s.votedate DESC`;
+    const targetBindings = voteTargets.flatMap((bill) => [bill.voteBillNumber, bill.voteSequence]);
+    votes = (await db.prepare(voteQuery).bind(...employeeIds, ...targetBindings).all<VoteRow>()).results;
   }
   const mapped = reps.results.map((rep): RepresentativeResult => ({
     id: rep.id,
@@ -161,11 +194,14 @@ export async function findRepresentatives(
     townsRepresented: rep.towns_represented || undefined,
     isFloterial: rep.chamber.toLowerCase() === "house" && rep.district_number !== primaryHouseDistrict,
     trackedVotes: bills.map((bill) => {
-      const found = votes.find((vote) => vote.representative_id === rep.employeeno && vote.bill_number === bill.voteBillNumber);
-      const vote: Vote | null = found ? {
-        vote: voteLabel(found.vote), vote_label: voteLabel(found.vote),
-        question_motion: found.question_motion || undefined
-      } : null;
+      const found = votes.find((vote) =>
+        vote.representative_id === rep.employeeno
+        && vote.bill_number === bill.voteBillNumber
+        && vote.vote_sequence === bill.voteSequence
+      );
+      const vote: Vote | null = found
+        ? { ...interpretedVote(bill, found.vote), question_motion: found.question_motion || undefined }
+        : null;
       return { bill, vote };
     })
   }));

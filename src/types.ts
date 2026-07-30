@@ -9,12 +9,18 @@ export type TrackerBill = {
   articles?: string;
   testimonySupporting?: string;
   testimonyOpposed?: string;
+  yeaInterpretation?: string;
+  nayInterpretation?: string;
+  voteSequence?: number;
+  preferredStance?: string;
 };
 
 export type Vote = {
   vote: string;
   vote_label: string;
   question_motion?: string;
+  interpretation?: string;
+  alignment?: "preferred" | "opposed" | "neutral";
 };
 
 export type TrackedVote = { bill: TrackerBill; vote: Vote | null };

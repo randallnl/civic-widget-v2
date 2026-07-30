@@ -10,6 +10,15 @@ describe("tracker parsing", () => {
     const [bill] = parseTrackerCsv('Code,Name,Summary,Impact,MoreInfoURL,Issue Area\r\nHB2-LGBTQ,"HB2, LGBTQ","A summary","An impact",https://example.com,"Civil Rights, Labor"\r\n');
     expect(bill).toMatchObject({ billNumber: "HB2-LGBTQ", voteBillNumber: "HB2", title: "HB2, LGBTQ", issueArea: "Civil Rights, Labor" });
   });
+  it("parses vote sequence, interpretations, and preferred stance", () => {
+    const [bill] = parseTrackerCsv("Code,Name,Yea Interpretation,Nay Interpretation,Vote Sequence,Preferred Stance\nHB115,HB115,Anti-Public Education,Pro-Public Education,64,Nay\n");
+    expect(bill).toMatchObject({
+      voteSequence: 64,
+      yeaInterpretation: "Anti-Public Education",
+      nayInterpretation: "Pro-Public Education",
+      preferredStance: "Nay"
+    });
+  });
   it("only permits Google Sheets HTTPS URLs", () => {
     expect(() => safeSheetUrl("https://evil.example/sheet.csv")).toThrow();
     expect(safeSheetUrl("https://docs.google.com/spreadsheets/d/a/pub?output=csv").hostname).toBe("docs.google.com");

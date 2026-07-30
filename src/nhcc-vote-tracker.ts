@@ -56,7 +56,11 @@ export class NhccVoteTracker extends LitElement {
 
   private voteRow(item: TrackedVote) {
     const label = item.vote?.vote_label || item.vote?.vote || "No vote found";
-    const tone = /support|yea/i.test(label) ? "support" : /against|nay/i.test(label) ? "against" : "";
+    const tone = item.vote?.alignment === "preferred"
+      ? "support"
+      : item.vote?.alignment === "opposed"
+        ? "against"
+        : "";
     return html`<div class="vote-row">
       <div>
         <div><span class="bill-code">${item.bill.billNumber}</span> · <span class="bill-title">${item.bill.url ? html`<a href=${item.bill.url} target="_blank" rel="noopener noreferrer">${item.bill.title}</a>` : item.bill.title}</span></div>

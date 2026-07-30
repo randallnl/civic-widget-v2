@@ -32,6 +32,8 @@ export function parseTrackerCsv(csv: string): TrackerBill[] {
   return rows.flatMap((row) => {
     const billNumber = get(row, "code");
     if (!billNumber) return [];
+    const rawSequence = get(row, "vote sequence");
+    const voteSequence = rawSequence && /^\d+$/.test(rawSequence) ? Number(rawSequence) : undefined;
     return [{
       billNumber,
       voteBillNumber: voteBillNumber(billNumber),
@@ -42,7 +44,11 @@ export function parseTrackerCsv(csv: string): TrackerBill[] {
       issueArea: get(row, "issue area"),
       articles: get(row, "articles"),
       testimonySupporting: get(row, "testimony supporting"),
-      testimonyOpposed: get(row, "testimony opposed")
+      testimonyOpposed: get(row, "testimony opposed"),
+      yeaInterpretation: get(row, "yea interpretation"),
+      nayInterpretation: get(row, "nay interpretation"),
+      voteSequence,
+      preferredStance: get(row, "preferred stance")
     }];
   });
 }
