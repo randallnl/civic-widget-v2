@@ -25,6 +25,8 @@ export class NhccVoteTracker extends LitElement {
   @state() private error = "";
   @state() private result?: VoteTrackerLookupResponse;
   @state() private selectedIssue = "";
+  @state() private searchQuery = "";
+  @state() private expandedReps = new Set<number>();
 
   private emit(name: string, detail: unknown) {
     this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
@@ -49,6 +51,8 @@ export class NhccVoteTracker extends LitElement {
         sessionYear: this.sessionYear, candidateYear: this.candidateYear
       });
       this.selectedIssue = "";
+      this.searchQuery = "";
+      this.expandedReps = new Set();
       this.emit("nhcc-widget-success", { address, result: this.result });
     } catch (error) {
       this.error = error instanceof Error ? error.message : "Unable to load voting information.";
@@ -77,7 +81,10 @@ export class NhccVoteTracker extends LitElement {
           <span class="bill-title">${item.bill.url ? html`<a href=${item.bill.url} target="_blank" rel="noopener noreferrer">${title}</a>` : title}</span>
         </div>
         ${issues.length ? html`<div class="issues">${issues.map((issue) => html`<span>${issue}</span>`)}</div>` : nothing}
-        ${item.bill.impact ? html`<p class="impact">${item.bill.impact}</p>` : nothing}
+        ${item.bill.summary ? html`<details class="why">
+          <summary>Why this matters</summary>
+          <p>${item.bill.summary}</p>
+        </details>` : nothing}
       </div>
       <span class="pill ${tone}" title=${item.vote?.question_motion || ""}>${label}</span>
     </div>`;
@@ -88,14 +95,36 @@ export class NhccVoteTracker extends LitElement {
   }
 
   private filteredVotes(rep: RepresentativeResult) {
-    if (!this.selectedIssue) return rep.trackedVotes;
-    return rep.trackedVotes.filter(({ bill }) =>
-      bill.issueArea?.split(",").some((issue) => issue.trim() === this.selectedIssue)
-    );
+    const query = this.searchQuery.trim().toLowerCase();
+    return rep.trackedVotes.filter(({ bill }) => {
+      const matchesIssue = !this.selectedIssue || bill.issueArea
+        ?.split(",")
+        .some((issue) => issue.trim() === this.selectedIssue);
+      const matchesSearch = !query || [
+        bill.billNumber,
+        bill.title,
+        bill.summary,
+        bill.issueArea,
+        bill.yeaInterpretation,
+        bill.nayInterpretation
+      ].some((value) => value?.toLowerCase().includes(query));
+      return Boolean(matchesIssue && matchesSearch);
+    });
+  }
+
+  private toggleExpanded(repId: number) {
+    const expanded = new Set(this.expandedReps);
+    expanded.has(repId) ? expanded.delete(repId) : expanded.add(repId);
+    this.expandedReps = expanded;
   }
 
   private repCard(rep: RepresentativeResult) {
     const votes = this.filteredVotes(rep);
+    const expanded = this.expandedReps.has(rep.id);
+    const visibleVotes = expanded ? votes : votes.slice(0, 3);
+    const preferred = votes.filter(({ vote }) => vote?.alignment === "preferred").length;
+    const opposed = votes.filter(({ vote }) => vote?.alignment === "opposed").length;
+    const neutral = votes.length - preferred - opposed;
     return html`<article class="rep">
       <div class="rep-head">
         <div class="identity">
@@ -119,7 +148,20 @@ export class NhccVoteTracker extends LitElement {
         ${rep.websiteUrl ? html`<a href=${rep.websiteUrl} target="_blank" rel="noopener noreferrer">Official page</a>` : nothing}
       </div>` : nothing}
       ${rep.townsRepresented ? html`<div class="towns"><strong>Communities represented:</strong> ${rep.townsRepresented}</div>` : nothing}
-      ${votes.length ? votes.map((v) => this.voteRow(v)) : html`<div class="vote-row">No tracked votes match this issue.</div>`}
+      ${votes.length ? html`
+        <div class="vote-summary" aria-label="Tracked vote summary">
+          <strong>${votes.length} tracked vote${votes.length === 1 ? "" : "s"}</strong>
+          <span class="summary-preferred">${preferred} preferred</span>
+          <span class="summary-opposed">${opposed} opposed</span>
+          ${neutral ? html`<span class="summary-neutral">${neutral} other</span>` : nothing}
+        </div>
+        ${visibleVotes.map((v) => this.voteRow(v))}
+        ${votes.length > 3 ? html`<div class="view-all">
+          <button class="secondary" type="button" @click=${() => this.toggleExpanded(rep.id)}>
+            ${expanded ? "Show fewer votes" : `View all ${votes.length} votes`}
+          </button>
+        </div>` : nothing}
+      ` : html`<div class="empty-votes">No tracked votes match these filters.</div>`}
     </article>`;
   }
 
@@ -138,12 +180,25 @@ export class NhccVoteTracker extends LitElement {
       bill.issueArea?.split(",").map((issue) => issue.trim()).filter(Boolean) || []
     ))].sort();
     return issues.length ? html`<div class="filter">
-      <label for="issue">Filter votes by issue</label>
-      <select id="issue" .value=${this.selectedIssue} @change=${(event: Event) => this.selectedIssue = (event.target as HTMLSelectElement).value}>
-        <option value="">All issues</option>
-        ${issues.map((issue) => html`<option value=${issue}>${issue}</option>`)}
-      </select>
-      <span>Showing ${this.result.tracker.count} tracked bills from the partner tracker.</span>
+      <div class="filter-control">
+        <label for="issue">Filter by issue</label>
+        <select id="issue" .value=${this.selectedIssue} @change=${(event: Event) => this.selectedIssue = (event.target as HTMLSelectElement).value}>
+          <option value="">All issues</option>
+          ${issues.map((issue) => html`<option value=${issue}>${issue}</option>`)}
+        </select>
+      </div>
+      <div class="filter-control">
+        <label for="vote-search">Search bills</label>
+        <input id="vote-search" type="search" placeholder="Bill number or keyword" .value=${this.searchQuery}
+          @input=${(event: InputEvent) => this.searchQuery = (event.target as HTMLInputElement).value}>
+      </div>
+      <div class="legend" aria-label="Vote color legend">
+        <strong>Vote colors</strong>
+        <span><i class="legend-preferred"></i>Matches preferred stance</span>
+        <span><i class="legend-opposed"></i>Opposes preferred stance</span>
+        <span><i class="legend-neutral"></i>Absent, present, or other</span>
+      </div>
+      <span class="tracker-count">${this.result.tracker.count} bills meet the tracker’s vote-sequence and preferred-stance requirements.</span>
     </div>` : nothing;
   }
 

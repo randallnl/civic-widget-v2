@@ -236,11 +236,28 @@ export const widgetStyles = css`
     font-size: .83rem;
   }
 
+  .vote-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 10px 20px;
+    border-top: 1px solid #e7ebf0;
+    background: #fafbfc;
+    color: #697380;
+    font-size: .75rem;
+  }
+
+  .vote-summary strong { margin-right: 3px; color: #3f4a57; }
+  .vote-summary span { padding: 2px 7px; border-radius: 999px; font-weight: 750; }
+  .summary-preferred { background: #e1f3e8; color: #176438; }
+  .summary-opposed { background: #fce8e3; color: #98351f; }
+  .summary-neutral { background: #edf0f4; color: #596472; }
+
   .filter {
     display: grid;
-    grid-template-columns: auto minmax(170px, 1fr);
-    align-items: center;
-    gap: 7px 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
     margin-bottom: 20px;
     padding: 15px 17px;
     border: 1px solid #ccd8ed;
@@ -248,12 +265,14 @@ export const widgetStyles = css`
     background: #f3f6fd;
   }
 
-  .filter label {
+  .filter-control label {
     position: static;
+    display: block;
     width: auto;
     height: auto;
     overflow: visible;
     clip: auto;
+    margin-bottom: 6px;
     color: #304977;
     font-size: .75rem;
     font-weight: 850;
@@ -261,8 +280,9 @@ export const widgetStyles = css`
     text-transform: uppercase;
   }
 
-  .filter select {
+  .filter select, .filter input {
     width: 100%;
+    min-height: 42px;
     padding: 9px 34px 9px 12px;
     border: 1px solid #aebed8;
     border-radius: 8px;
@@ -271,7 +291,26 @@ export const widgetStyles = css`
     font: inherit;
   }
 
-  .filter span { grid-column: 1 / -1; color: var(--muted); font-size: .78rem; }
+  .filter input { padding-right: 12px; border-radius: 8px; font-weight: 500; }
+  .tracker-count { grid-column: 1 / -1; color: var(--muted); font-size: .78rem; }
+
+  .legend {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px 14px;
+    padding-top: 2px;
+    color: #596574;
+    font-size: .74rem;
+  }
+
+  .legend strong { color: #304977; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-preferred { background: #65ae7c; }
+  .legend-opposed { background: #d57864; }
+  .legend-neutral { background: #9aa4b0; }
 
   .ward-prompt {
     display: grid;
@@ -323,9 +362,27 @@ export const widgetStyles = css`
     font-size: .7rem;
     font-weight: 700;
   }
-  .impact {
+  .why {
     max-width: 66ch;
-    margin: 9px 0 0;
+    margin-top: 9px;
+    color: #46515e;
+    font-size: .85rem;
+  }
+
+  .why summary {
+    width: max-content;
+    color: var(--blue-dark);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .why summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  .why p {
+    margin: 7px 0 0;
+    padding: 10px 12px;
+    border-left: 3px solid #c9d6f1;
+    background: #f7f9fd;
     color: #46515e;
     font-size: .87rem;
     line-height: 1.5;
@@ -348,6 +405,25 @@ export const widgetStyles = css`
   .support { background: #e1f3e8; color: #176438; }
   .against { background: #fce8e3; color: #98351f; }
 
+  .view-all {
+    padding: 13px 20px 16px;
+    border-top: 1px solid #e7ebf0;
+    text-align: center;
+  }
+
+  button.secondary {
+    width: auto;
+    padding: 8px 16px;
+    border: 1px solid #b8c7e1;
+    background: #fff;
+    color: var(--blue-dark);
+    box-shadow: none;
+    font-size: .8rem;
+  }
+
+  button.secondary:hover { border-color: var(--blue); background: #f2f6ff; box-shadow: none; }
+  .empty-votes { padding: 18px 20px; border-top: 1px solid #e7ebf0; color: var(--muted); font-size: .85rem; }
+
   footer {
     padding: 13px 34px;
     border-top: 1px solid #e4e8ed;
@@ -367,7 +443,7 @@ export const widgetStyles = css`
     .avatar { flex-basis: 88px; width: 88px; height: 88px; }
     .rep-name { font-size: 1.08rem; }
     .vote-row, .filter, .ward-prompt { grid-template-columns: 1fr; }
-    .filter span { grid-column: auto; }
+    .legend, .tracker-count { grid-column: auto; }
     .ward-controls { align-items: stretch; flex-direction: column; }
     .ward-controls input { width: 100%; }
     .pill { max-width: none; justify-self: start; }
