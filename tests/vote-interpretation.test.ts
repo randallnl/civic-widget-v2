@@ -27,4 +27,20 @@ describe("vote interpretation", () => {
       alignment: "preferred"
     });
   });
+
+  it("keeps a recorded Present vote visible without treating it as missing", () => {
+    expect(interpretedVote(bill, "4")).toMatchObject({
+      vote: "present",
+      vote_label: "HB115: Present",
+      alignment: "neutral"
+    });
+  });
+
+  it("labels present-not-voting statuses consistently", () => {
+    expect(interpretedVote(bill, "6")).toMatchObject({
+      vote: "present not voting",
+      vote_label: "HB115: Present not voting",
+      alignment: "neutral"
+    });
+  });
 });

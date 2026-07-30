@@ -42,7 +42,18 @@ function houseDistrict(divisionId?: string): { county: string; district: string 
 }
 
 function voteLabel(code: string): string {
-  return ({ "1": "yea", "2": "nay", "3": "absent", "4": "No vote found", "6": "present" } as Record<string, string>)[code] || code;
+  return (
+    {
+      "0": "not counted",
+      "1": "yea",
+      "2": "nay",
+      "3": "absent",
+      "4": "present",
+      "5": "not voting",
+      "6": "present not voting",
+      "7": "present not voting",
+    } as Record<string, string>
+  )[code] || "unknown";
 }
 
 function displayVote(value: string): string {
