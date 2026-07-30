@@ -23,7 +23,7 @@ For local Worker development, create an uncommitted `.dev.vars` file containing 
 <script async src="https://api.nhciviccommons.com/widgets/vote-tracker.js"></script>
 ```
 
-The API defaults to `https://api.nhciviccommons.com`, and the widget defaults to the NH Civic Commons published bill tracker. Partners can override the tracker with a public Google Sheets CSV URL using the optional `sheet` attribute. Use `api-base` only for local or staging environments.
+The API currently defaults to `https://civic-widget-v2.randall-d53.workers.dev`, and the widget defaults to the NH Civic Commons published bill tracker. Partners can override the tracker with a public Google Sheets CSV URL using the optional `sheet` attribute. Use `api-base` only for local or staging environments.
 
 Representative results use `d1_people` for canonical names, photos, and contact details. House representation is resolved through `county_codes` and `d1_district_mapping.communities_represented`, allowing the widget to include both base and floterial districts. Residents may expand “My city uses wards” and provide a ward number when Google Civic Information does not return one.
 

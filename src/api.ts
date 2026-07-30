@@ -1,7 +1,7 @@
 import type { VoteTrackerLookupResponse } from "./types";
 import { DEFAULT_SHEET_URL } from "./config";
 
-export const DEFAULT_API_BASE = "https://api.nhciviccommons.com";
+export const DEFAULT_API_BASE = "https://civic-widget-v2.randall-d53.workers.dev";
 
 export type LookupConfig = {
   apiBase?: string;
