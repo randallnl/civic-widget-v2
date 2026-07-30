@@ -149,9 +149,18 @@ export class NhccVoteTracker extends LitElement {
         </div>
       </div>
       ${(rep.email || rep.phone || rep.websiteUrl) ? html`<div class="contact">
-        ${rep.email ? html`<a href=${`mailto:${rep.email}`}>Email</a>` : nothing}
-        ${rep.phone ? html`<a href=${`tel:${rep.phone}`}>${rep.phone}</a>` : nothing}
-        ${rep.websiteUrl ? html`<a href=${rep.websiteUrl} target="_blank" rel="noopener noreferrer">Official page</a>` : nothing}
+        ${rep.email ? html`<a href=${`mailto:${rep.email}`}>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 5.5h18v13H3zM4 7l8 6 8-6"/></svg>
+          Email
+        </a>` : nothing}
+        ${rep.phone ? html`<a href=${`tel:${rep.phone}`}>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7.2 3.5 10 7.8 7.9 10c1.3 2.7 3.4 4.8 6.1 6.1l2.2-2.1 4.3 2.8-.8 3.1c-.2.7-.8 1.1-1.5 1.1C9.8 20.5 3.5 14.2 3 5.8c0-.7.4-1.3 1.1-1.5z"/></svg>
+          ${rep.phone}
+        </a>` : nothing}
+        ${rep.websiteUrl ? html`<a href=${rep.websiteUrl} target="_blank" rel="noopener noreferrer">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M19 13v7H4V5h7"/></svg>
+          Official page
+        </a>` : nothing}
       </div>` : nothing}
       ${votes.length ? html`
         <div class="vote-summary" aria-label="Tracked vote summary">

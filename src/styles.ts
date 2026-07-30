@@ -246,7 +246,26 @@ export const widgetStyles = css`
     font-size: .85rem;
   }
 
-  .contact a { color: var(--blue-dark); font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--blue-dark);
+    font-weight: 750;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .contact svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
 
   .communities {
     max-width: 570px;
