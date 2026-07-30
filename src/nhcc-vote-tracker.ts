@@ -237,7 +237,10 @@ export class NhccVoteTracker extends LitElement {
           this.loading ? html`<div class="status">Looking up districts and tracked votes...</div>` :
           this.result && !total ? html`<div class="status">No representatives were found for that address.</div>` :
           this.result ? html`${this.wardPrompt()}${this.issueFilter()}${this.group("State Senate", this.result.groups.senate)}${this.group("State House", this.result.groups.house)}` :
-          html`<div class="status">Ready when you are.</div>`}
+          html`<div class="status ready">
+            <strong>See who represents you—and how they voted.</strong>
+            <span>Enter a New Hampshire address to connect the bills that matter with the people casting the votes.</span>
+          </div>`}
       </div>
       <footer>Voting data from NH Civic Commons</footer>
     </section>`;

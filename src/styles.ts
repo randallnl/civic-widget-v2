@@ -154,6 +154,26 @@ export const widgetStyles = css`
 
   .error { border-color: #efc4bd; background: #fff2ef; color: #922f21; }
 
+  .ready {
+    padding: 20px;
+    background: linear-gradient(135deg, #f4f7fe 0%, #fff8f3 100%);
+  }
+
+  .ready strong {
+    display: block;
+    color: var(--navy);
+    font-size: 1rem;
+    font-weight: 850;
+  }
+
+  .ready span {
+    display: block;
+    max-width: 590px;
+    margin: 4px auto 0;
+    color: #5d6876;
+    font-size: .86rem;
+  }
+
   h3 {
     margin: 28px 0 8px;
     color: var(--navy);
