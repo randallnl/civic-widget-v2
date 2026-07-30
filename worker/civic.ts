@@ -1,4 +1,4 @@
-export type CivicDivision = { id: string; name?: string };
+export type CivicDivision = { id?: string; name?: string };
 export type CivicResult = {
   normalizedInput?: Record<string, string>;
   divisions?: Record<string, CivicDivision>;
@@ -12,7 +12,7 @@ export type ParsedCivic = {
 };
 
 export function parseNhDivisions(divisions: Record<string, CivicDivision> = {}): ParsedCivic {
-  const values = Object.values(divisions);
+  const values = Object.entries(divisions).map(([id, division]) => ({ ...division, id }));
   const find = (part: string) => values.find((division) => division.id.includes(part));
   return {
     house: find("/sldl:"),
