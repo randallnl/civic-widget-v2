@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "nhcc-vote-tracker",
+  "name": "civic-widget-v2",
   "main": "worker/index.ts",
   "compatibility_date": "2026-07-29",
   "compatibility_flags": ["nodejs_compat"],
@@ -9,6 +9,20 @@
     "binding": "ASSETS",
     "run_worker_first": ["/widgets/vote-tracker/lookup", "/widgets/vote-tracker/demo"]
   },
+  "secrets_store_secrets": [
+    {
+      "binding": "CIVIC_API_KEY",
+      "store_id": "2b9ec8a0d6d742649ad4d3498815ca54",
+      "secret_name": "SECRET_CIVIC_API_KEY"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nhdb",
+      "database_id": "e72f4c03-671f-47d5-8f70-a6792ba8f6c0"
+    }
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
