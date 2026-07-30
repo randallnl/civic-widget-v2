@@ -7,6 +7,7 @@ export type LookupConfig = {
   apiBase?: string;
   address: string;
   ward?: string;
+  partner?: string;
   sheet?: string;
   sheetGid?: string;
   sessionYear?: number;
@@ -14,8 +15,8 @@ export type LookupConfig = {
 };
 
 export async function lookupVotes(config: LookupConfig): Promise<VoteTrackerLookupResponse> {
-  const { apiBase = DEFAULT_API_BASE, sheet = DEFAULT_SHEET_URL, ...rest } = config;
-  const body = { ...rest, sheet };
+  const { apiBase = DEFAULT_API_BASE, partner, sheet = DEFAULT_SHEET_URL, ...rest } = config;
+  const body = partner ? { ...rest, partner } : { ...rest, sheet };
   const response = await fetch(
     `${apiBase.replace(/\/$/, "")}/widgets/vote-tracker/lookup`,
     {

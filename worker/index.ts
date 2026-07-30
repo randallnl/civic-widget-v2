@@ -9,8 +9,13 @@ type RuntimeEnv = Env & {
   DB?: D1Database;
 };
 type LookupBody = {
-  address?: string; ward?: string; sheet?: string; sheetGid?: string;
+  address?: string; ward?: string; partner?: string; sheet?: string; sheetGid?: string;
   sessionYear?: number; candidateYear?: number;
+};
+type PartnerTracker = {
+  partner_key: string;
+  partner_name: string;
+  tracker_url: string;
 };
 
 const json = (data: unknown, status = 200, extra: HeadersInit = {}) => new Response(JSON.stringify(data), {
@@ -22,6 +27,31 @@ const cors = {
   "Access-Control-Allow-Headers": "Content-Type"
 };
 
+async function resolveTracker(
+  db: D1Database | undefined,
+  body: LookupBody
+): Promise<{ url: URL; partner?: { key: string; name: string } }> {
+  const partnerKey = body.partner?.trim().toLowerCase();
+  if (!partnerKey) {
+    return { url: safeSheetUrl(body.sheet?.trim() || DEFAULT_SHEET_URL, body.sheetGid) };
+  }
+  if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(partnerKey)) {
+    throw new Error("Invalid partner tracker.");
+  }
+  if (!db) throw new Error("Partner trackers are not configured.");
+  const tracker = await db.prepare(`
+    SELECT partner_key, partner_name, tracker_url
+    FROM partner_trackers
+    WHERE partner_key = ? AND is_active = 1
+    LIMIT 1
+  `).bind(partnerKey).first<PartnerTracker>();
+  if (!tracker) throw new Error("Partner tracker not found.");
+  return {
+    url: safeSheetUrl(tracker.tracker_url),
+    partner: { key: tracker.partner_key, name: tracker.partner_name }
+  };
+}
+
 async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   if (!env.CIVIC_API_KEY) return json({ error: "Civic Information API is not configured." }, 503, cors);
   const civicApiKey = typeof env.CIVIC_API_KEY === "string"
@@ -30,9 +60,10 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   if (!civicApiKey) return json({ error: "Civic Information API is not configured." }, 503, cors);
   const body = await request.json<LookupBody>().catch(() => null);
   const address = body?.address?.trim();
-  if (!address) return json({ error: "Address is required." }, 400, cors);
+  if (!body || !address) return json({ error: "Address is required." }, 400, cors);
 
-  const sheetUrl = safeSheetUrl(body?.sheet?.trim() || DEFAULT_SHEET_URL, body?.sheetGid);
+  const tracker = await resolveTracker(env.DB, body);
+  const sheetUrl = tracker.url;
   const [civicResult, sheetResponse] = await Promise.all([
     divisionsByAddress(address, civicApiKey),
     fetch(sheetUrl, { headers: { Accept: "text/csv" } })
@@ -46,7 +77,12 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   const groups = await findRepresentatives(env.DB, civic, bills, body?.sessionYear, body?.candidateYear, body?.ward);
   return json({
     address, normalizedInput: civicResult.normalizedInput || {}, civic, location, groups,
-    tracker: { source: sheetUrl.toString(), count: bills.length, bills }
+    tracker: {
+      source: tracker.partner ? `partner:${tracker.partner.key}` : sheetUrl.toString(),
+      partner: tracker.partner,
+      count: bills.length,
+      bills
+    }
   }, 200, cors);
 }
 

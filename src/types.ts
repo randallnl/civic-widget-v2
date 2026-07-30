@@ -51,5 +51,10 @@ export type VoteTrackerLookupResponse = {
     wardRequired: boolean;
   };
   groups: { senate: RepresentativeResult[]; house: RepresentativeResult[] };
-  tracker: { source: string; count: number; bills: TrackerBill[] };
+  tracker: {
+    source: string;
+    partner?: { key: string; name: string };
+    count: number;
+    bills: TrackerBill[];
+  };
 };

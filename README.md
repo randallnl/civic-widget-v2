@@ -23,7 +23,24 @@ For local Worker development, create an uncommitted `.dev.vars` file containing 
 <script async src="https://api.nhciviccommons.com/widgets/vote-tracker.js"></script>
 ```
 
-The API currently defaults to `https://civic-widget-v2.randall-d53.workers.dev`, and the widget defaults to the NH Civic Commons published bill tracker. Partners can override the tracker with a public Google Sheets CSV URL using the optional `sheet` attribute. Use `api-base` only for local or staging environments.
+The API currently defaults to `https://civic-widget-v2.randall-d53.workers.dev`, and the widget defaults to the NH Civic Commons published bill tracker. Partner trackers should be stored in the D1 `partner_trackers` table and selected with the public, non-secret `partner` attribute. The Worker resolves the tracker URL and ignores client-supplied sheet URLs for partner embeds. The optional `sheet` attribute remains available for non-partner previews. Use `api-base` only for local or staging environments.
+
+### ABLE NH partner embed
+
+```html
+<nhcc-vote-tracker
+  partner="able-nh"
+  title="See how your NH representatives voted"
+  subtitle="Enter your address to explore votes on bills tracked by ABLE NH."
+  button-label="Find my legislators">
+</nhcc-vote-tracker>
+<script
+  async
+  src="https://civic-widget-v2.randall-d53.workers.dev/widgets/vote-tracker.js">
+</script>
+```
+
+The `able-nh` record is created by `migrations/0001_partner_trackers.sql`. New partners need a unique lowercase key, display name, public CSV tracker URL, and their own embed code using that key.
 
 Representative results use `d1_people` for canonical names, photos, and contact details. House representation is resolved through `county_codes` and `d1_district_mapping.communities_represented`, allowing the widget to include both base and floterial districts. When Google does not return a ward for one of New Hampshire’s ward-based cities, the widget asks the resident for their ward and repeats the lookup.
 

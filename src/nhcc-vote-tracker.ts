@@ -10,6 +10,7 @@ export class NhccVoteTracker extends LitElement {
   static styles = widgetStyles;
 
   @property() sheet = DEFAULT_SHEET_URL;
+  @property() partner?: string;
   @property({ attribute: "sheet-gid" }) sheetGid?: string;
   @property({ type: Number, attribute: "session-year" }) sessionYear?: number;
   @property({ type: Number, attribute: "candidate-year" }) candidateYear?: number;
@@ -43,7 +44,8 @@ export class NhccVoteTracker extends LitElement {
     this.emit("nhcc-widget-submit", { address });
     try {
       this.result = await lookupVotes({
-        apiBase: this.apiBase, address, ward: this.ward.trim() || undefined, sheet: this.sheet, sheetGid: this.sheetGid,
+        apiBase: this.apiBase, address, ward: this.ward.trim() || undefined, partner: this.partner,
+        sheet: this.sheet, sheetGid: this.sheetGid,
         sessionYear: this.sessionYear, candidateYear: this.candidateYear
       });
       this.selectedIssue = "";
