@@ -165,8 +165,8 @@ export class NhccVoteTracker extends LitElement {
       ${votes.length ? html`
         <div class="vote-summary" aria-label="Tracked vote summary">
           <strong>${votes.length} tracked vote${votes.length === 1 ? "" : "s"}</strong>
-          <span class="summary-preferred">${preferred} preferred</span>
-          <span class="summary-opposed">${opposed} opposed</span>
+          <span class="summary-preferred">${preferred} aligned</span>
+          <span class="summary-opposed">${opposed} unaligned</span>
           ${neutral ? html`<span class="summary-neutral">${neutral} other</span>` : nothing}
         </div>
         ${visibleVotes.map((v) => this.voteRow(v))}
@@ -208,8 +208,8 @@ export class NhccVoteTracker extends LitElement {
       </div>
       <div class="legend" aria-label="Vote color legend">
         <strong>Vote colors</strong>
-        <span><i class="legend-preferred"></i>Matches preferred stance</span>
-        <span><i class="legend-opposed"></i>Opposes preferred stance</span>
+        <span><i class="legend-preferred"></i>Aligned with preferred stance</span>
+        <span><i class="legend-opposed"></i>Unaligned with preferred stance</span>
         <span><i class="legend-neutral"></i>Absent, present, or other</span>
       </div>
       <span class="tracker-count">${this.result.tracker.count} bills meet the tracker’s vote-sequence and preferred-stance requirements.</span>
