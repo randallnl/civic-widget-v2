@@ -19,9 +19,11 @@ export class NhccVoteTracker extends LitElement {
   @property() placeholder = "Street address, city, NH";
   @property({ attribute: "api-base" }) apiBase = DEFAULT_API_BASE;
   @state() private address = "";
+  @state() private ward = "";
   @state() private loading = false;
   @state() private error = "";
   @state() private result?: VoteTrackerLookupResponse;
+  @state() private selectedIssue = "";
 
   private emit(name: string, detail: unknown) {
     this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
@@ -37,9 +39,10 @@ export class NhccVoteTracker extends LitElement {
     this.emit("nhcc-widget-submit", { address });
     try {
       this.result = await lookupVotes({
-        apiBase: this.apiBase, address, sheet: this.sheet, sheetGid: this.sheetGid,
+        apiBase: this.apiBase, address, ward: this.ward.trim() || undefined, sheet: this.sheet, sheetGid: this.sheetGid,
         sessionYear: this.sessionYear, candidateYear: this.candidateYear
       });
+      this.selectedIssue = "";
       this.emit("nhcc-widget-success", { address, result: this.result });
     } catch (error) {
       this.error = error instanceof Error ? error.message : "Unable to load voting information.";
@@ -60,15 +63,68 @@ export class NhccVoteTracker extends LitElement {
     </div>`;
   }
 
+  private initials(name: string) {
+    return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+  }
+
+  private filteredVotes(rep: RepresentativeResult) {
+    if (!this.selectedIssue) return rep.trackedVotes;
+    return rep.trackedVotes.filter(({ bill }) =>
+      bill.issueArea?.split(",").some((issue) => issue.trim() === this.selectedIssue)
+    );
+  }
+
   private repCard(rep: RepresentativeResult) {
+    const votes = this.filteredVotes(rep);
     return html`<article class="rep">
-      <div class="rep-head"><div><div class="rep-name">${rep.name}</div><div class="meta">${rep.chamber} · District ${rep.district}</div></div>${rep.party ? html`<span class="party">${rep.party}</span>` : nothing}</div>
-      ${rep.trackedVotes.length ? rep.trackedVotes.map((v) => this.voteRow(v)) : html`<div class="vote-row">No tracked votes found.</div>`}
+      <div class="rep-head">
+        <div class="identity">
+          <div class="avatar" aria-hidden="true">
+            <span>${this.initials(rep.name)}</span>
+            ${rep.photoUrl ? html`<img src=${rep.photoUrl} alt="" loading="lazy" referrerpolicy="no-referrer" @error=${(event: Event) => (event.currentTarget as HTMLImageElement).remove()}>` : nothing}
+          </div>
+          <div>
+            <div class="rep-name">${rep.name}</div>
+            <div class="meta">${rep.chamber} · District ${rep.district}</div>
+            <div class="chips">
+              ${rep.party ? html`<span class="party">${rep.party}</span>` : nothing}
+              ${rep.isFloterial ? html`<span class="floterial">Floterial district</span>` : nothing}
+            </div>
+          </div>
+        </div>
+      </div>
+      ${(rep.email || rep.phone || rep.websiteUrl) ? html`<div class="contact">
+        ${rep.email ? html`<a href=${`mailto:${rep.email}`}>Email</a>` : nothing}
+        ${rep.phone ? html`<a href=${`tel:${rep.phone}`}>${rep.phone}</a>` : nothing}
+        ${rep.websiteUrl ? html`<a href=${rep.websiteUrl} target="_blank" rel="noopener noreferrer">Official page</a>` : nothing}
+      </div>` : nothing}
+      ${rep.townsRepresented ? html`<div class="towns"><strong>Communities represented:</strong> ${rep.townsRepresented}</div>` : nothing}
+      ${votes.length ? votes.map((v) => this.voteRow(v)) : html`<div class="vote-row">No tracked votes match this issue.</div>`}
     </article>`;
   }
 
   private group(label: string, reps: RepresentativeResult[]) {
-    return reps.length ? html`<section><h3>${label}</h3>${reps.map((r) => this.repCard(r))}</section>` : nothing;
+    const districts = [...new Set(reps.map((rep) => rep.district))];
+    return reps.length ? html`<section>
+      <h3>${label}</h3>
+      <div class="district-summary">${districts.length} district${districts.length === 1 ? "" : "s"} · ${reps.length} representative${reps.length === 1 ? "" : "s"}</div>
+      ${reps.map((r) => this.repCard(r))}
+    </section>` : nothing;
+  }
+
+  private issueFilter() {
+    if (!this.result) return nothing;
+    const issues = [...new Set(this.result.tracker.bills.flatMap((bill) =>
+      bill.issueArea?.split(",").map((issue) => issue.trim()).filter(Boolean) || []
+    ))].sort();
+    return issues.length ? html`<div class="filter">
+      <label for="issue">Filter votes by issue</label>
+      <select id="issue" .value=${this.selectedIssue} @change=${(event: Event) => this.selectedIssue = (event.target as HTMLSelectElement).value}>
+        <option value="">All issues</option>
+        ${issues.map((issue) => html`<option value=${issue}>${issue}</option>`)}
+      </select>
+      <span>Showing ${this.result.tracker.count} tracked bills from the partner tracker.</span>
+    </div>` : nothing;
   }
 
   render() {
@@ -76,15 +132,25 @@ export class NhccVoteTracker extends LitElement {
     return html`<section class="shell">
       <header><h2>${this.title}</h2><p>${this.subtitle}</p></header>
       <form @submit=${this.submit}>
-        <label for="address">New Hampshire address</label>
-        <input id="address" autocomplete="street-address" .value=${this.address} @input=${(e: InputEvent) => this.address = (e.target as HTMLInputElement).value} placeholder=${this.placeholder} ?disabled=${this.loading}>
+        <div class="address-fields">
+          <label for="address">New Hampshire address</label>
+          <input id="address" autocomplete="street-address" .value=${this.address} @input=${(e: InputEvent) => this.address = (e.target as HTMLInputElement).value} placeholder=${this.placeholder} ?disabled=${this.loading}>
+          <details class="ward-assist">
+            <summary>My city uses wards</summary>
+            <div>
+              <label for="ward">Ward number</label>
+              <input id="ward" type="number" min="1" max="99" inputmode="numeric" .value=${this.ward} @input=${(e: InputEvent) => this.ward = (e.target as HTMLInputElement).value} placeholder="Ward, if known" ?disabled=${this.loading}>
+              <span>Use this when your address lookup does not return all of your representatives.</span>
+            </div>
+          </details>
+        </div>
         <button type="submit" ?disabled=${this.loading}>${this.loading ? "Looking up…" : this.buttonLabel}</button>
       </form>
       <div class="body" aria-live="polite">
         ${this.error ? html`<div class="status error" role="alert">${this.error}</div>` :
           this.loading ? html`<div class="status">Looking up districts and tracked votes...</div>` :
           this.result && !total ? html`<div class="status">No representatives were found for that address.</div>` :
-          this.result ? html`${this.group("State Senate", this.result.groups.senate)}${this.group("State House", this.result.groups.house)}` :
+          this.result ? html`${this.issueFilter()}${this.group("State Senate", this.result.groups.senate)}${this.group("State House", this.result.groups.house)}` :
           html`<div class="status">Ready when you are.</div>`}
       </div>
       <footer>Voting data from NH Civic Commons</footer>

@@ -6,6 +6,7 @@ export const DEFAULT_API_BASE = "https://api.nhciviccommons.com";
 export type LookupConfig = {
   apiBase?: string;
   address: string;
+  ward?: string;
   sheet?: string;
   sheetGid?: string;
   sessionYear?: number;

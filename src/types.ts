@@ -20,10 +20,18 @@ export type Vote = {
 export type TrackedVote = { bill: TrackerBill; vote: Vote | null };
 
 export type RepresentativeResult = {
+  id: number;
   name: string;
+  slug?: string;
   chamber: "House" | "Senate";
   district: string;
   party?: string;
+  photoUrl?: string;
+  email?: string;
+  phone?: string;
+  websiteUrl?: string;
+  townsRepresented?: string;
+  isFloterial?: boolean;
   trackedVotes: TrackedVote[];
 };
 

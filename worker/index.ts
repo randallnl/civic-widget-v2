@@ -8,7 +8,7 @@ type RuntimeEnv = Env & {
   DB?: D1Database;
 };
 type LookupBody = {
-  address?: string; sheet?: string; sheetGid?: string;
+  address?: string; ward?: string; sheet?: string; sheetGid?: string;
   sessionYear?: number; candidateYear?: number;
 };
 
@@ -41,7 +41,7 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   if (csv.length > 2_000_000) throw new Error("The bill tracker is too large.");
   const bills = parseTrackerCsv(csv);
   const civic = parseNhDivisions(civicResult.divisions);
-  const groups = await findRepresentatives(env.DB, civic, bills, body?.sessionYear, body?.candidateYear);
+  const groups = await findRepresentatives(env.DB, civic, bills, body?.sessionYear, body?.candidateYear, body?.ward);
   return json({
     address, normalizedInput: civicResult.normalizedInput || {}, civic, groups,
     tracker: { source: sheetUrl.toString(), count: bills.length, bills }
