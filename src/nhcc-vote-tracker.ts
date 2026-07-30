@@ -142,6 +142,9 @@ export class NhccVoteTracker extends LitElement {
               ${rep.party ? html`<span class="party">${rep.party}</span>` : nothing}
               ${rep.isFloterial ? html`<span class="floterial">Floterial district</span>` : nothing}
             </div>
+            ${rep.townsRepresented ? html`<div class="communities">
+              <strong>Communities represented:</strong> ${rep.townsRepresented}
+            </div>` : nothing}
           </div>
         </div>
       </div>
@@ -150,7 +153,6 @@ export class NhccVoteTracker extends LitElement {
         ${rep.phone ? html`<a href=${`tel:${rep.phone}`}>${rep.phone}</a>` : nothing}
         ${rep.websiteUrl ? html`<a href=${rep.websiteUrl} target="_blank" rel="noopener noreferrer">Official page</a>` : nothing}
       </div>` : nothing}
-      ${rep.townsRepresented ? html`<div class="towns"><strong>Communities represented:</strong> ${rep.townsRepresented}</div>` : nothing}
       ${votes.length ? html`
         <div class="vote-summary" aria-label="Tracked vote summary">
           <strong>${votes.length} tracked vote${votes.length === 1 ? "" : "s"}</strong>

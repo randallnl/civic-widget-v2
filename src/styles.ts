@@ -248,13 +248,15 @@ export const widgetStyles = css`
 
   .contact a { color: var(--blue-dark); font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
-  .towns {
-    padding: 11px 20px;
-    border-top: 1px solid #e7ebf0;
-    background: var(--cream);
+  .communities {
+    max-width: 570px;
+    margin-top: 9px;
     color: #596371;
-    font-size: .83rem;
+    font-size: .79rem;
+    line-height: 1.4;
   }
+
+  .communities strong { color: #444f5d; }
 
   .vote-summary {
     display: flex;
