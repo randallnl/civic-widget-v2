@@ -123,11 +123,12 @@ export class NhccVoteTracker extends LitElement {
 
   private repCard(rep: RepresentativeResult) {
     const votes = this.filteredVotes(rep);
+    const allVotes = rep.trackedVotes;
     const expanded = this.expandedReps.has(rep.id);
     const visibleVotes = expanded ? votes : votes.slice(0, 3);
-    const preferred = votes.filter(({ vote }) => vote?.alignment === "preferred").length;
-    const opposed = votes.filter(({ vote }) => vote?.alignment === "opposed").length;
-    const neutral = votes.length - preferred - opposed;
+    const preferred = allVotes.filter(({ vote }) => vote?.alignment === "preferred").length;
+    const opposed = allVotes.filter(({ vote }) => vote?.alignment === "opposed").length;
+    const neutral = allVotes.length - preferred - opposed;
     return html`<article class="rep">
       <div class="rep-head">
         <div class="identity">
@@ -162,17 +163,18 @@ export class NhccVoteTracker extends LitElement {
           Official page
         </a>` : nothing}
       </div>` : nothing}
+      <div class="vote-summary" aria-label="Tracked vote summary">
+        <strong>${allVotes.length} tracked vote${allVotes.length === 1 ? "" : "s"}</strong>
+        <span class="summary-preferred">${preferred} aligned</span>
+        <span class="summary-opposed">${opposed} unaligned</span>
+        ${neutral ? html`<span class="summary-neutral">${neutral} other</span>` : nothing}
+      </div>
       ${votes.length ? html`
-        <div class="vote-summary" aria-label="Tracked vote summary">
-          <strong>${votes.length} tracked vote${votes.length === 1 ? "" : "s"}</strong>
-          <span class="summary-preferred">${preferred} aligned</span>
-          <span class="summary-opposed">${opposed} unaligned</span>
-          ${neutral ? html`<span class="summary-neutral">${neutral} other</span>` : nothing}
-        </div>
         ${visibleVotes.map((v) => this.voteRow(v))}
         ${votes.length > 3 ? html`<div class="view-all">
+          <span>${expanded ? `Showing all ${votes.length}` : `Showing 3 of ${votes.length}`}</span>
           <button class="secondary" type="button" @click=${() => this.toggleExpanded(rep.id)}>
-            ${expanded ? "Show fewer votes" : `View all ${votes.length} votes`}
+            ${expanded ? "Show fewer votes" : "Show more votes"}
           </button>
         </div>` : nothing}
       ` : html`<div class="empty-votes">No tracked votes match these filters.</div>`}

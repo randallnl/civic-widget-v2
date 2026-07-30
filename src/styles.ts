@@ -463,10 +463,17 @@ export const widgetStyles = css`
   .against { background: #fce8e3; color: #98351f; }
 
   .view-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
     padding: 13px 20px 16px;
     border-top: 1px solid #e7ebf0;
     text-align: center;
   }
+
+  .view-all > span { color: #747e8a; font-size: .76rem; font-weight: 650; }
 
   button.secondary {
     width: auto;
