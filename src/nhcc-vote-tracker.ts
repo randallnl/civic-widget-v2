@@ -223,7 +223,7 @@ export class NhccVoteTracker extends LitElement {
     return html`<div class="ward-prompt" role="status">
       <div>
         <strong>What ward do you live in?</strong>
-        <span>${this.result.location.placeName} uses wards, but Google did not return one for this address. Add your ward so we can include every House representative, including floterial districts.</span>
+        <span>We could not identify the ward for this ${this.result.location.placeName} address. Add it to include every House representative, including floterial districts.</span>
       </div>
       <div class="ward-controls">
         <label for="ward">Ward number</label>

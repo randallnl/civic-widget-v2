@@ -356,20 +356,30 @@ export const widgetStyles = css`
   .ward-prompt {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 14px;
+    align-items: center;
+    gap: 18px;
     margin-bottom: 20px;
-    padding: 16px;
-    border: 1px solid #e8b18e;
+    padding: 17px 18px;
+    border: 1px solid #dfa27c;
     border-radius: 12px;
-    background: #fff5ee;
-    color: #633c27;
+    background: #fff8f3;
+    color: #513426;
   }
 
   .ward-prompt strong, .ward-prompt span { display: block; }
-  .ward-prompt span { margin-top: 3px; font-size: .85rem; }
+  .ward-prompt strong { color: #39271f; font-size: .98rem; line-height: 1.3; }
+  .ward-prompt span { max-width: 58ch; margin-top: 5px; color: #684a3b; font-size: .82rem; line-height: 1.45; }
   .ward-controls { display: flex; align-items: center; gap: 8px; }
-  .ward-controls input { width: 82px; background: #fff; }
-  .ward-controls button { align-self: stretch; padding: 8px 14px; }
+  .ward-controls input { width: 78px; min-height: 38px; padding: 8px 10px; border-radius: 8px; background: #fff; }
+  .ward-controls button {
+    width: auto;
+    min-height: 38px;
+    align-self: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: .78rem;
+    box-shadow: none;
+  }
 
   .vote-row {
     display: grid;
@@ -510,6 +520,7 @@ export const widgetStyles = css`
     .legend, .tracker-count { grid-column: auto; }
     .ward-controls { align-items: stretch; flex-direction: column; }
     .ward-controls input { width: 100%; }
+    .ward-controls button { width: auto; align-self: flex-start; }
     .pill { max-width: none; justify-self: start; }
     .vote-result { align-items: flex-start; }
     footer { padding-inline: 18px; }
