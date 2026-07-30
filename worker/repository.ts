@@ -48,7 +48,7 @@ function displayVote(value: string): string {
   return value === "No vote found" ? value : value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function interpretedVote(bill: TrackerBill, rawCode: string): Vote {
+export function interpretedVote(bill: TrackerBill, rawCode: string): Vote {
   const vote = voteLabel(rawCode);
   const normalizedVote = vote.toLowerCase();
   const interpretation = normalizedVote === "yea"
