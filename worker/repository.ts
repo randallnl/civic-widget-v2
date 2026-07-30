@@ -14,7 +14,7 @@ type RepresentativeRow = {
   phone: string | null;
   website_url: string | null;
   towns_represented: string | null;
-  district_number: string;
+  is_floterial_district: number | null;
 };
 type VoteRow = {
   representative_id: number;
@@ -27,6 +27,7 @@ type DistrictMappingRow = {
   county: number;
   district: number;
   communities_represented: string;
+  is_floterial_district: number;
 };
 
 function districtCode(divisionId?: string): string | undefined {
@@ -113,10 +114,10 @@ export async function findRepresentatives(
   const roleYear = candidateYear ?? sessionYear ?? 2026;
   const place = civicPlace(civic);
   let houseMappings: DistrictMappingRow[] = [];
-  let primaryHouseDistrict = house?.district;
 
   if (house) {
-    const mappings = await db.prepare(`SELECT m.county, m.district, m.communities_represented
+    const mappings = await db.prepare(`SELECT m.county, m.district, m.communities_represented,
+        m.is_floterial_district
       FROM d1_district_mapping m
       JOIN county_codes cc ON cc.source_county_id = m.county
       WHERE m.body = 'H' AND upper(cc.name) = ?`)
@@ -142,7 +143,7 @@ export async function findRepresentatives(
       CASE WHEN r.legislativebody = 'H' THEN cc.name || ' ' || r.district ELSE r.district END AS district,
       p.party, p.photo_url, p.email, p.phone, p.website_url,
       COALESCE(NULLIF(r.towns_represented, ''), m.communities_represented) AS towns_represented,
-      r.district AS district_number
+      m.is_floterial_district
     FROM d1_people p
     JOIN d1_person_legislator_roles r ON r.person_id = p.id
     LEFT JOIN county_codes cc ON cc.code = r.countycode
@@ -192,8 +193,8 @@ export async function findRepresentatives(
     phone: rep.phone || undefined,
     websiteUrl: rep.website_url || undefined,
     townsRepresented: rep.towns_represented || undefined,
-    isFloterial: rep.chamber.toLowerCase() === "house" && rep.district_number !== primaryHouseDistrict,
-    trackedVotes: bills.map((bill) => {
+    isFloterial: rep.chamber.toLowerCase() === "house" && rep.is_floterial_district === 1,
+    trackedVotes: bills.flatMap((bill) => {
       const found = votes.find((vote) =>
         vote.representative_id === rep.employeeno
         && vote.bill_number === bill.voteBillNumber
@@ -202,7 +203,7 @@ export async function findRepresentatives(
       const vote: Vote | null = found
         ? { ...interpretedVote(bill, found.vote), question_motion: found.question_motion || undefined }
         : null;
-      return { bill, vote };
+      return vote ? [{ bill, vote }] : [];
     })
   }));
   return {

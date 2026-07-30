@@ -29,6 +29,8 @@ Representative results use `d1_people` for canonical names, photos, and contact 
 
 Tracked votes are matched by the sheet’s exact `Code` and `Vote Sequence` pair, even when tracked bills span multiple session years. `Preferred Stance` determines the pill color, while `Yea Interpretation` and `Nay Interpretation` provide the displayed vote meaning.
 
+Bill rows are returned only when that legislator has a matching roll-call record. Floterial status comes directly from `d1_district_mapping.is_floterial_district`.
+
 ## Existing API integration
 
 Copy `worker/` into the existing NH Civic Commons API Worker or merge its three routes:

@@ -29,7 +29,7 @@ export const widgetStyles = css`
   .rep { margin-bottom:14px; border:1px solid #dce2ea; border-radius:8px; overflow:hidden; }
   .rep-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; background:#fbfcfe; }
   .identity { display:flex; align-items:center; gap:12px; min-width:0; }
-  .avatar { position:relative; display:grid; flex:0 0 54px; width:54px; height:54px; place-items:center; overflow:hidden; border:1px solid #d8dee8; border-radius:50%; background:#eaf0f7; color:#40516a; font-size:.8rem; font-weight:800; }
+  .avatar { position:relative; display:grid; flex:0 0 84px; width:84px; height:84px; place-items:center; overflow:hidden; border:1px solid #d8dee8; border-radius:14px; background:#eaf0f7; color:#40516a; font-size:1rem; font-weight:800; box-shadow:0 4px 12px rgb(25 42 70 / 12%); }
   .avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .rep-name { font-weight:750; } .meta { color:#667389; font-size:.87rem; }
   .chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
@@ -50,6 +50,6 @@ export const widgetStyles = css`
   .support { background:#e3f4e9; color:#176334; } .against { background:#fde8e6; color:#9b2c25; }
   .pill { max-width:270px; white-space:normal; text-align:center; line-height:1.3; }
   footer { padding:12px 24px; border-top:1px solid #e4e9f0; color:#6c7789; font-size:.78rem; }
-  @media (max-width:560px) { form { flex-direction:column; } button { width:100%; } .vote-row { grid-template-columns:1fr; } .filter { grid-template-columns:1fr; } .filter span { grid-column:auto; } .ward-prompt { grid-template-columns:1fr; } .ward-controls { align-items:stretch; flex-direction:column; } .ward-controls input { width:100%; } }
+  @media (max-width:560px) { form { flex-direction:column; } button { width:100%; } .vote-row { grid-template-columns:1fr; } .filter { grid-template-columns:1fr; } .filter span { grid-column:auto; } .ward-prompt { grid-template-columns:1fr; } .ward-controls { align-items:stretch; flex-direction:column; } .ward-controls input { width:100%; } .avatar { flex-basis:72px; width:72px; height:72px; } }
   @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
 `;
