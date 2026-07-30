@@ -422,6 +422,22 @@ export const widgetStyles = css`
     text-align: center;
   }
 
+  .vote-result {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .vote-label {
+    color: #6d7784;
+    font-size: .66rem;
+    font-weight: 850;
+    letter-spacing: .1em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
   .support { background: #e1f3e8; color: #176438; }
   .against { background: #fce8e3; color: #98351f; }
 
@@ -467,6 +483,7 @@ export const widgetStyles = css`
     .ward-controls { align-items: stretch; flex-direction: column; }
     .ward-controls input { width: 100%; }
     .pill { max-width: none; justify-self: start; }
+    .vote-result { align-items: flex-start; }
     footer { padding-inline: 18px; }
   }
 

@@ -86,7 +86,10 @@ export class NhccVoteTracker extends LitElement {
           <p>${item.bill.summary}</p>
         </details>` : nothing}
       </div>
-      <span class="pill ${tone}" title=${item.vote?.question_motion || ""}>${label}</span>
+      <div class="vote-result">
+        <span class="vote-label">Vote</span>
+        <span class="pill ${tone}" title=${item.vote?.question_motion || ""}>${label}</span>
+      </div>
     </div>`;
   }
 
