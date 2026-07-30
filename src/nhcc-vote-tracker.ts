@@ -58,15 +58,25 @@ export class NhccVoteTracker extends LitElement {
 
   private voteRow(item: TrackedVote) {
     const label = item.vote?.vote_label || item.vote?.vote || "No vote found";
+    const title = item.bill.title
+      .replace(new RegExp(`^${item.bill.billNumber.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*`, "i"), "")
+      .trim();
+    const issues = item.bill.issueArea
+      ?.split(",")
+      .map((issue) => issue.trim())
+      .filter(Boolean) || [];
     const tone = item.vote?.alignment === "preferred"
       ? "support"
       : item.vote?.alignment === "opposed"
         ? "against"
         : "";
     return html`<div class="vote-row">
-      <div>
-        <div><span class="bill-code">${item.bill.billNumber}</span> · <span class="bill-title">${item.bill.url ? html`<a href=${item.bill.url} target="_blank" rel="noopener noreferrer">${item.bill.title}</a>` : item.bill.title}</span></div>
-        ${item.bill.issueArea ? html`<div class="issue">${item.bill.issueArea}</div>` : nothing}
+      <div class="bill-details">
+        <div class="bill-heading">
+          <span class="bill-code">${item.bill.billNumber}</span>
+          <span class="bill-title">${item.bill.url ? html`<a href=${item.bill.url} target="_blank" rel="noopener noreferrer">${title}</a>` : title}</span>
+        </div>
+        ${issues.length ? html`<div class="issues">${issues.map((issue) => html`<span>${issue}</span>`)}</div>` : nothing}
         ${item.bill.impact ? html`<p class="impact">${item.bill.impact}</p>` : nothing}
       </div>
       <span class="pill ${tone}" title=${item.vote?.question_motion || ""}>${label}</span>

@@ -4,6 +4,7 @@ export const widgetStyles = css`
   :host {
     display: block;
     max-width: 880px;
+    margin-inline: auto;
     color: #252c34;
     font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --navy: #252c34;
@@ -170,6 +171,7 @@ export const widgetStyles = css`
     border-radius: 14px;
     background: #fff;
     box-shadow: 0 8px 24px rgb(38 52 71 / 7%);
+    text-align: left;
   }
 
   .rep-head {
@@ -295,12 +297,39 @@ export const widgetStyles = css`
     gap: 14px;
     padding: 17px 20px;
     border-top: 1px solid #e7ebf0;
+    text-align: left;
   }
 
-  .bill-code { color: var(--blue-dark); font-weight: 850; }
-  .bill-title { font-weight: 700; }
-  .issue { margin-top: 4px; color: var(--muted); font-size: .8rem; }
-  .impact { margin: 8px 0 0; color: #46515e; font-size: .9rem; }
+  .bill-details { min-width: 0; text-align: left; }
+  .bill-heading { display: flex; align-items: baseline; gap: 9px; line-height: 1.35; }
+  .bill-code {
+    flex: none;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: #edf2ff;
+    color: var(--blue-dark);
+    font-size: .78rem;
+    font-weight: 850;
+    letter-spacing: .02em;
+  }
+  .bill-title { color: var(--navy); font-size: .95rem; font-weight: 750; }
+  .bill-title a { text-decoration-color: #aebee1; text-underline-offset: 3px; }
+  .issues { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .issues span {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #f2f3f5;
+    color: #66707c;
+    font-size: .7rem;
+    font-weight: 700;
+  }
+  .impact {
+    max-width: 66ch;
+    margin: 9px 0 0;
+    color: #46515e;
+    font-size: .87rem;
+    line-height: 1.5;
+  }
   a { color: inherit; }
 
   .pill {
