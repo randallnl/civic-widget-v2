@@ -153,7 +153,11 @@ export class NhccVoteTracker extends LitElement {
   render() {
     const total = this.result ? this.result.groups.house.length + this.result.groups.senate.length : 0;
     return html`<section class="shell">
-      <header><h2>${this.title}</h2><p>${this.subtitle}</p></header>
+      <header>
+        <div class="eyebrow">Community-powered civic information</div>
+        <h2>${this.title}</h2>
+        <p>${this.subtitle}</p>
+      </header>
       <form @submit=${this.submit}>
         <div class="address-fields">
           <label for="address">New Hampshire address</label>
