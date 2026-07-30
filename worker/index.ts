@@ -2,6 +2,7 @@ import { divisionsByAddress, parseNhDivisions } from "./civic";
 import { findRepresentatives } from "./repository";
 import { parseTrackerCsv, safeSheetUrl } from "./tracker";
 import { DEFAULT_SHEET_URL } from "../src/config";
+import { getWardStatus } from "./location";
 
 type RuntimeEnv = Env & {
   CIVIC_API_KEY?: SecretsStoreSecret | string;
@@ -41,15 +42,16 @@ async function lookup(request: Request, env: RuntimeEnv): Promise<Response> {
   if (csv.length > 2_000_000) throw new Error("The bill tracker is too large.");
   const bills = parseTrackerCsv(csv);
   const civic = parseNhDivisions(civicResult.divisions);
+  const location = getWardStatus(civic, civicResult.normalizedInput?.city, body?.ward);
   const groups = await findRepresentatives(env.DB, civic, bills, body?.sessionYear, body?.candidateYear, body?.ward);
   return json({
-    address, normalizedInput: civicResult.normalizedInput || {}, civic, groups,
+    address, normalizedInput: civicResult.normalizedInput || {}, civic, location, groups,
     tracker: { source: sheetUrl.toString(), count: bills.length, bills }
   }, 200, cors);
 }
 
 function demo(): Response {
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NHCC Vote Tracker Demo</title><style>body{margin:0;background:#eef2f7}main{max-width:820px;margin:48px auto;padding:20px}</style></head><body><main><nhcc-vote-tracker></nhcc-vote-tracker></main><script src="/widgets/vote-tracker.js?v=20260730-1"></script></body></html>`, {
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NHCC Vote Tracker Demo</title><style>body{margin:0;background:#eef2f7}main{max-width:820px;margin:48px auto;padding:20px}</style></head><body><main><nhcc-vote-tracker></nhcc-vote-tracker></main><script src="/widgets/vote-tracker.js?v=20260730-2"></script></body></html>`, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store"

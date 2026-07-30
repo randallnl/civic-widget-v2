@@ -31,6 +31,10 @@ export class NhccVoteTracker extends LitElement {
 
   private async submit(event: SubmitEvent) {
     event.preventDefault();
+    await this.runLookup();
+  }
+
+  private async runLookup() {
     const address = this.address.trim();
     this.error = "";
     if (!address) { this.error = "Address is required."; return; }
@@ -127,6 +131,21 @@ export class NhccVoteTracker extends LitElement {
     </div>` : nothing;
   }
 
+  private wardPrompt() {
+    if (!this.result?.location.wardRequired) return nothing;
+    return html`<div class="ward-prompt" role="status">
+      <div>
+        <strong>What ward do you live in?</strong>
+        <span>${this.result.location.placeName} uses wards, but Google did not return one for this address. Add your ward so we can include every House representative, including floterial districts.</span>
+      </div>
+      <div class="ward-controls">
+        <label for="ward">Ward number</label>
+        <input id="ward" type="number" min="1" max="99" inputmode="numeric" .value=${this.ward} @input=${(event: InputEvent) => this.ward = (event.target as HTMLInputElement).value} placeholder="Ward">
+        <button type="button" ?disabled=${!this.ward.trim() || this.loading} @click=${() => this.runLookup()}>Update representatives</button>
+      </div>
+    </div>`;
+  }
+
   render() {
     const total = this.result ? this.result.groups.house.length + this.result.groups.senate.length : 0;
     return html`<section class="shell">
@@ -135,14 +154,6 @@ export class NhccVoteTracker extends LitElement {
         <div class="address-fields">
           <label for="address">New Hampshire address</label>
           <input id="address" autocomplete="street-address" .value=${this.address} @input=${(e: InputEvent) => this.address = (e.target as HTMLInputElement).value} placeholder=${this.placeholder} ?disabled=${this.loading}>
-          <details class="ward-assist">
-            <summary>My city uses wards</summary>
-            <div>
-              <label for="ward">Ward number</label>
-              <input id="ward" type="number" min="1" max="99" inputmode="numeric" .value=${this.ward} @input=${(e: InputEvent) => this.ward = (e.target as HTMLInputElement).value} placeholder="Ward, if known" ?disabled=${this.loading}>
-              <span>Use this when your address lookup does not return all of your representatives.</span>
-            </div>
-          </details>
         </div>
         <button type="submit" ?disabled=${this.loading}>${this.loading ? "Looking up…" : this.buttonLabel}</button>
       </form>
@@ -150,7 +161,7 @@ export class NhccVoteTracker extends LitElement {
         ${this.error ? html`<div class="status error" role="alert">${this.error}</div>` :
           this.loading ? html`<div class="status">Looking up districts and tracked votes...</div>` :
           this.result && !total ? html`<div class="status">No representatives were found for that address.</div>` :
-          this.result ? html`${this.issueFilter()}${this.group("State Senate", this.result.groups.senate)}${this.group("State House", this.result.groups.house)}` :
+          this.result ? html`${this.wardPrompt()}${this.issueFilter()}${this.group("State Senate", this.result.groups.senate)}${this.group("State House", this.result.groups.house)}` :
           html`<div class="status">Ready when you are.</div>`}
       </div>
       <footer>Voting data from NH Civic Commons</footer>

@@ -39,6 +39,11 @@ export type VoteTrackerLookupResponse = {
   address: string;
   normalizedInput: unknown;
   civic: Record<string, unknown>;
+  location: {
+    placeName: string;
+    ward?: string;
+    wardRequired: boolean;
+  };
   groups: { senate: RepresentativeResult[]; house: RepresentativeResult[] };
   tracker: { source: string; count: number; bills: TrackerBill[] };
 };

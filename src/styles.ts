@@ -14,11 +14,13 @@ export const widgetStyles = css`
   input:focus { outline:3px solid #cce2f8; border-color:#1b5ea8; }
   button { padding:11px 18px; border:0; border-radius:6px; background:#1b5ea8; color:#fff; font:700 inherit; cursor:pointer; }
   button:hover { background:#154c89; } button:disabled { opacity:.65; cursor:wait; }
-  .ward-assist { margin-top:8px; color:#536176; font-size:.8rem; }
-  .ward-assist summary { width:max-content; color:#1b5ea8; cursor:pointer; font-weight:650; }
-  .ward-assist > div { display:grid; grid-template-columns:minmax(130px,180px) 1fr; align-items:center; gap:7px 10px; margin-top:8px; padding:10px; border-radius:6px; background:#f3f6fa; }
-  .ward-assist label { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
-  .ward-assist input { width:100%; }
+  .ward-prompt { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; margin-bottom:18px; padding:14px; border:1px solid #e3b74f; border-radius:8px; background:#fff9e8; color:#5c4615; }
+  .ward-prompt strong, .ward-prompt span { display:block; }
+  .ward-prompt span { margin-top:3px; font-size:.85rem; }
+  .ward-controls { display:flex; align-items:center; gap:8px; }
+  .ward-controls label { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  .ward-controls input { width:76px; background:#fff; }
+  .ward-controls button { align-self:stretch; padding:8px 12px; }
   .body { padding:0 24px 24px; }
   .status { padding:14px 16px; border-radius:6px; background:#f3f6fa; color:#536176; }
   .error { background:#fff1f0; color:#9b2c25; }
@@ -47,6 +49,6 @@ export const widgetStyles = css`
   a { color:inherit; } .pill { align-self:start; padding:4px 9px; border-radius:999px; background:#edf1f6; color:#40516a; font-size:.78rem; font-weight:800; white-space:nowrap; }
   .support { background:#e3f4e9; color:#176334; } .against { background:#fde8e6; color:#9b2c25; }
   footer { padding:12px 24px; border-top:1px solid #e4e9f0; color:#6c7789; font-size:.78rem; }
-  @media (max-width:560px) { form { flex-direction:column; } button { width:100%; } .vote-row { grid-template-columns:1fr; } .filter { grid-template-columns:1fr; } .filter span { grid-column:auto; } }
+  @media (max-width:560px) { form { flex-direction:column; } button { width:100%; } .vote-row { grid-template-columns:1fr; } .filter { grid-template-columns:1fr; } .filter span { grid-column:auto; } .ward-prompt { grid-template-columns:1fr; } .ward-controls { align-items:stretch; flex-direction:column; } .ward-controls input { width:100%; } }
   @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
 `;
