@@ -7,7 +7,7 @@ describe("tracker parsing", () => {
     expect(voteBillNumber("HB2-LGBTQ")).toBe("HB2");
   });
   it("parses quoted commas and expected columns", () => {
-    const [bill] = parseTrackerCsv('Code,Name,Summary,Impact,MoreInfoURL,Issue Area\r\nHB2-LGBTQ,"HB2, LGBTQ","A summary","An impact",https://example.com,"Civil Rights, Labor"\r\n');
+    const [bill] = parseTrackerCsv('Code,Name,Summary,Impact,MoreInfoURL,Issue Area,Vote Sequence,Preferred Stance\r\nHB2-LGBTQ,"HB2, LGBTQ","A summary","An impact",https://example.com,"Civil Rights, Labor",12,Nay\r\n');
     expect(bill).toMatchObject({ billNumber: "HB2-LGBTQ", voteBillNumber: "HB2", title: "HB2, LGBTQ", issueArea: "Civil Rights, Labor" });
   });
   it("parses vote sequence, interpretations, and preferred stance", () => {
@@ -18,6 +18,16 @@ describe("tracker parsing", () => {
       nayInterpretation: "Pro-Public Education",
       preferredStance: "Nay"
     });
+  });
+  it("excludes bills without both a vote sequence and preferred stance", () => {
+    const bills = parseTrackerCsv(
+      "Code,Name,Vote Sequence,Preferred Stance\n"
+      + "HB1,Complete,12,Nay\n"
+      + "HB2,Missing sequence,,Yea\n"
+      + "HB3,Missing stance,13,\n"
+      + "HB4,Invalid sequence,TBD,Nay\n"
+    );
+    expect(bills.map((bill) => bill.billNumber)).toEqual(["HB1"]);
   });
   it("only permits Google Sheets HTTPS URLs", () => {
     expect(() => safeSheetUrl("https://evil.example/sheet.csv")).toThrow();

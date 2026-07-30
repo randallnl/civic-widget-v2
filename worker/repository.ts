@@ -30,6 +30,23 @@ type DistrictMappingRow = {
   is_floterial_district: number;
 };
 
+const MAX_VOTE_QUERY_VARIABLES = 90;
+
+export function voteTargetBatches<T>(
+  targets: T[],
+  representativeCount: number
+): T[][] {
+  const batchSize = Math.max(
+    1,
+    Math.floor((MAX_VOTE_QUERY_VARIABLES - representativeCount) / 2)
+  );
+  const batches: T[][] = [];
+  for (let index = 0; index < targets.length; index += batchSize) {
+    batches.push(targets.slice(index, index + batchSize));
+  }
+  return batches;
+}
+
 function districtCode(divisionId?: string): string | undefined {
   return divisionId?.split(":").at(-1)?.toUpperCase();
 }
@@ -175,22 +192,25 @@ export async function findRepresentatives(
   );
   let votes: VoteRow[] = [];
   if (employeeIds.length && voteTargets.length) {
-    const targetConditions = voteTargets.map(() =>
-      "(upper(h.condensedbillno) = ? AND h.votesequencenumber = ?)"
-    );
-    const voteQuery = `SELECT h.employeenumber AS representative_id,
-        upper(h.condensedbillno) AS bill_number,
-        h.votesequencenumber AS vote_sequence, h.vote, s.question_motion
-      FROM d1_rollcallhistory h
-      JOIN d1_rollcallsummary s
-        ON s.sessionyear = h.sessionyear
-        AND s.legislativebody = h.legislativebody
-        AND s.votesequencenumber = h.votesequencenumber
-      WHERE h.employeenumber IN (${employeeIds.map(() => "?").join(",")})
-        AND (${targetConditions.join(" OR ")})
-      ORDER BY h.sessionyear DESC, s.votedate DESC`;
-    const targetBindings = voteTargets.flatMap((bill) => [bill.voteBillNumber, bill.voteSequence]);
-    votes = (await db.prepare(voteQuery).bind(...employeeIds, ...targetBindings).all<VoteRow>()).results;
+    const results = await Promise.all(voteTargetBatches(voteTargets, employeeIds.length).map(async (batch) => {
+      const targetConditions = batch.map(() =>
+        "(upper(h.condensedbillno) = ? AND h.votesequencenumber = ?)"
+      );
+      const voteQuery = `SELECT h.employeenumber AS representative_id,
+          upper(h.condensedbillno) AS bill_number,
+          h.votesequencenumber AS vote_sequence, h.vote, s.question_motion
+        FROM d1_rollcallhistory h
+        JOIN d1_rollcallsummary s
+          ON s.sessionyear = h.sessionyear
+          AND s.legislativebody = h.legislativebody
+          AND s.votesequencenumber = h.votesequencenumber
+        WHERE h.employeenumber IN (${employeeIds.map(() => "?").join(",")})
+          AND (${targetConditions.join(" OR ")})
+        ORDER BY h.sessionyear DESC, s.votedate DESC`;
+      const targetBindings = batch.flatMap((bill) => [bill.voteBillNumber, bill.voteSequence]);
+      return (await db.prepare(voteQuery).bind(...employeeIds, ...targetBindings).all<VoteRow>()).results;
+    }));
+    votes = results.flat();
   }
   const mapped = reps.results.map((rep): RepresentativeResult => ({
     id: rep.id,

@@ -34,6 +34,8 @@ export function parseTrackerCsv(csv: string): TrackerBill[] {
     if (!billNumber) return [];
     const rawSequence = get(row, "vote sequence");
     const voteSequence = rawSequence && /^\d+$/.test(rawSequence) ? Number(rawSequence) : undefined;
+    const preferredStance = get(row, "preferred stance");
+    if (voteSequence === undefined || !preferredStance) return [];
     return [{
       billNumber,
       voteBillNumber: voteBillNumber(billNumber),
@@ -48,7 +50,7 @@ export function parseTrackerCsv(csv: string): TrackerBill[] {
       yeaInterpretation: get(row, "yea interpretation"),
       nayInterpretation: get(row, "nay interpretation"),
       voteSequence,
-      preferredStance: get(row, "preferred stance")
+      preferredStance
     }];
   });
 }
